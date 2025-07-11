@@ -65,19 +65,25 @@ void UAStarComponent::AStar()
 	
 	while (OpenLocations.size() > 0)
 	{
-		CurrentNode = OpenLocations.front(); // should get the first element (didn't for some reason?)
+		CurrentNode = OpenLocations.front(); 
 		CurrentNodePointer = &CurrentNode;
+		int index = -1;
+		int indexToDelete = 0;
 		
 		for (FAStarNode item : OpenLocations)
 		{
+			index++;
 			if (item.GetF() < CurrentNode.GetF())
 			{
+				indexToDelete = index;
 				CurrentNode = item;
 			}
 		}		
 
-		//OpenLocations.remove(CurrentNodePointer); //TODO: not removing?
-		OpenLocations.pop_front(); //removed the front but current node was second element for some reason
+		
+		OpenLocations.erase(OpenLocations.begin() + indexToDelete);
+		//OpenLocations.remove(index); //TODO: not removing?
+		//OpenLocations.pop_front(); //removed the front but current node was second element for some reason
 		ClosedLocations.push_back(CurrentNode.GetPosition());
 
 		UE_LOG(LogTemp, Warning, TEXT("Current Added to close"));
@@ -85,8 +91,16 @@ void UAStarComponent::AStar()
 		if (CurrentNode.GetPosition() == target.GetPosition())
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, "Target Found");
+
+			OpenLocations.clear();
+			
 			FAStarNode current = CurrentNode;
 			TArray<FVector2D> path;
+
+			/*while (current.GetPosition() != start.GetPosition())
+			{
+				path.Add(current.GetPosition());
+			}*/
 
 			/*while (current != nullptr)
 			{
