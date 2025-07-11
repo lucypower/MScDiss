@@ -38,13 +38,38 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Generation")
 	TSubclassOf<AActor> GridWalls;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Generation")
+	int MinRegionSize;
+
+	int CorridorIterations = 0;
+	
+	void GetRegionsAndEdges();
+
+	TArray<TArray<FVector2D>> GetMapRegions();
+
+	TArray<FVector2D> GetRegion(int x, int y);
+
+	TArray<TArray<FVector2D>> GetMapEdges(TArray<TArray<FVector2D>> regions);
+
+	TArray<FVector2D> GetRegionEdges(TArray<FVector2D> region);
+
+	void FindConnectingRooms(TArray<TArray<FVector2D>> edges);
+
+	void ConnectRooms(FVector2D startCoord, FVector2D endCoord);
 	
 	void GenerateGrid();
 
 	void IterateGrid();
 
+	void AddBorder();
+
 	void InstantiateGrid();
 
 	int GetNeighbouringWallCount(int x, int y);
 
+	TArray<TArray<int>> GetGrid() {return Grid;};
+
+	int GetGridWidth() {return GridWidth;};
+
+	int GetGridHeight() {return GridHeight;};
 };
