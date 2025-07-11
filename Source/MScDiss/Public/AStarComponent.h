@@ -18,17 +18,17 @@ private :
 
 	FVector2D Position;
 
-	FAStarNode* Parent;
+	FVector2D ParentPosition;
 
 
 public :
 
 	FAStarNode(){};
 
-	FAStarNode(FVector2D position)
+	FAStarNode(FVector2D position, FVector2D parentPosition)
 	{
 		Position = position;
-		//Parent = parent;
+		ParentPosition = parentPosition;
 	};
 
 	int GetG() { return G; };
@@ -45,8 +45,7 @@ public :
 
 	FVector2D GetPosition() { return Position; };
 
-	//FAStarNode* GetParent() { return Parent; };
-
+	FVector2D GetParentPosition() { return ParentPosition; };
 };
 
 

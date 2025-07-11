@@ -56,8 +56,8 @@ void UAStarComponent::AStar()
 
 	// need to get spawn location from whatever class I do that in / ML one
 
-	FAStarNode start = FAStarNode(StartPos);
-	FAStarNode target = FAStarNode(TargetPos);
+	FAStarNode start = FAStarNode(StartPos, StartPos);
+	FAStarNode target = FAStarNode(TargetPos, TargetPos);
 	
 	OpenLocations.push_back(start);
 
@@ -94,12 +94,21 @@ void UAStarComponent::AStar()
 
 			OpenLocations.clear();
 			
-			FAStarNode current = CurrentNode;
+			FAStarNode* current = &CurrentNode;
 			TArray<FVector2D> path;
 
-			/*while (current.GetPosition() != start.GetPosition())
+			/*while (current->GetPosition() != start.GetPosition())
 			{
-				path.Add(current.GetPosition());
+				path.Add(current->GetPosition());
+				current = current->GetParentPosition();
+			}
+
+			for (int i = path.Num() - 1; i >= 0; i--)
+			{
+				if (i != path.Num())
+				{
+					DrawDebugLine(GetWorld(), FVector(path[i].X * 100, path[i].Y * 100, 100 ), FVector(path[i-1].X * 100, path[i-1].Y * 100, 100), FColor::Red, true);
+				}
 			}*/
 
 			/*while (current != nullptr)
@@ -153,7 +162,7 @@ void UAStarComponent::AddChild(FVector2D childNodePos)
 			if (!(std::find(ClosedLocations.begin(), ClosedLocations.end(), childNodePos) != ClosedLocations.end()))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Child floor found"));
-				FAStarNode newChildNode = FAStarNode(childNodePos);
+				FAStarNode newChildNode = FAStarNode(childNodePos, CurrentNode.GetPosition());
 
 				newChildNode.SetG(CurrentNode.GetG() + 1);
 				newChildNode.SetH(FMath::Pow((newChildNode.GetPosition().X - TargetPos.X), 2) + FMath::Pow((newChildNode.GetPosition().Y - TargetPos.Y), 2));
