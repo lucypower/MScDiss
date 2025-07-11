@@ -21,6 +21,7 @@ void UAStarComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
 	
 	GetGridArray();
@@ -55,38 +56,39 @@ void UAStarComponent::AStar()
 
 	// need to get spawn location from whatever class I do that in / ML one
 
-	FAStarNode start = FAStarNode(StartPos, nullptr);
-	FAStarNode target = FAStarNode(TargetPos, nullptr);
+	FAStarNode start = FAStarNode(StartPos);
+	FAStarNode target = FAStarNode(TargetPos);
 	
-	OpenLocations.Add(&start);
+	OpenLocations.push_back(start);
 
 	UE_LOG(LogTemp, Warning, TEXT("Start added to open"));
 	
-	while (OpenLocations.Num() > 0)
+	while (OpenLocations.size() > 0)
 	{
-		FAStarNode* currentNode = OpenLocations[0];
-		int currentIndex = 0;
-
-		for (FAStarNode* item : OpenLocations)
+		CurrentNode = OpenLocations.front(); // should get the first element (didn't for some reason?)
+		CurrentNodePointer = &CurrentNode;
+		
+		for (FAStarNode item : OpenLocations)
 		{
-			if (item->GetF() < currentNode->GetF())
+			if (item.GetF() < CurrentNode.GetF())
 			{
-				currentNode  = item;				
+				CurrentNode = item;
 			}
 		}		
 
-		OpenLocations.Remove(currentNode);
-		ClosedLocations.Add(currentNode);
+		//OpenLocations.remove(CurrentNodePointer); //TODO: not removing?
+		OpenLocations.pop_front(); //removed the front but current node was second element for some reason
+		ClosedLocations.push_back(CurrentNode.GetPosition());
 
 		UE_LOG(LogTemp, Warning, TEXT("Current Added to close"));
 
-		if (currentNode->GetPosition() == target.GetPosition())
+		if (CurrentNode.GetPosition() == target.GetPosition())
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, "Target Found");
-			/*FAStarNode* current = CurrentNode;
+			FAStarNode current = CurrentNode;
 			TArray<FVector2D> path;
 
-			while (current != nullptr)
+			/*while (current != nullptr)
 			{
 				path.Add(current->GetPosition());
 				current = current->GetParent();
@@ -98,52 +100,33 @@ void UAStarComponent::AStar()
 				{
 					DrawDebugLine(GetWorld(), FVector(path[i].X * 100, path[i].Y * 100, 100 ), FVector(path[i-1].X * 100, path[i-1].Y * 100, 100), FColor::Red, true);
 				}
-				Path.Add(path[i]);
-			}*/
-
-			
-
-			// SO : we find the path, following the psuedocode, then we reverse it, then we send a signal to the pawn to move through the reversed path somehow
+				Path.Add(path[i]);*/
 		}
+		// SO : we find the path, following the psuedocode, then we reverse it, then we send a signal to the pawn to move through the reversed path somehow
 
-		AddChild(FVector2D(currentNode->GetPosition().X - 1, currentNode->GetPosition().Y));
-		AddChild(FVector2D(currentNode->GetPosition().X + 1, currentNode->GetPosition().Y));		
-		AddChild(FVector2D(currentNode->GetPosition().X, currentNode->GetPosition().Y - 1));		
-		AddChild(FVector2D(currentNode->GetPosition().X, currentNode->GetPosition().Y + 1));
+		AddChild(FVector2D(CurrentNode.GetPosition().X - 1, CurrentNode.GetPosition().Y));
+		AddChild(FVector2D(CurrentNode.GetPosition().X + 1, CurrentNode.GetPosition().Y));		
+		AddChild(FVector2D(CurrentNode.GetPosition().X, CurrentNode.GetPosition().Y - 1));		
+		AddChild(FVector2D(CurrentNode.GetPosition().X, CurrentNode.GetPosition().Y + 1));
 
 		UE_LOG(LogTemp, Warning, TEXT("Children Found"));
+		UE_LOG(LogTemp, Warning, TEXT("Children Array Num : %d"), ChildrenNodes.Num());
 
 
-		for (FAStarNode* child : ChildrenNodes)
+		for (FAStarNode child : ChildrenNodes)
 		{
-			for (FAStarNode* closed : ClosedLocations)
+			for (FAStarNode open : OpenLocations)
 			{
-				if (child->GetPosition() == closed->GetPosition())
+				if (child.GetPosition() == open.GetPosition())
 				{
 					continue;
 				}
 			}
 
-			child->SetG(currentNode->GetG() + 1);
-			child->SetH(FMath::Pow((child->GetPosition().X - target.GetPosition().X), 2) + FMath::Pow((child->GetPosition().Y - target.GetPosition().Y), 2));
-			child->SetF(child->GetG() + child->GetH());
-			UE_LOG(LogTemp, Warning, TEXT("Set ghf"));
-
-
-			for (FAStarNode* open : OpenLocations)
-			{
-				if (OpenLocations.Contains(child))
-				{
-					if (child->GetG() > open->GetG())
-					{
-						continue;
-					}
-				}
-			}
-
-			OpenLocations.Add(child);
+			OpenLocations.push_back(child); 
 		}
-		
+
+		ChildrenNodes.Empty();
 	}
 }
 
@@ -153,8 +136,18 @@ void UAStarComponent::AddChild(FVector2D childNodePos)
 	{
 		if (Grid[childNodePos.X][childNodePos.Y] == 0)
 		{
-			FAStarNode newChildNode = FAStarNode(childNodePos, CurrentNode);
-			ChildrenNodes.Add(&newChildNode);			
+			if (!(std::find(ClosedLocations.begin(), ClosedLocations.end(), childNodePos) != ClosedLocations.end()))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Child floor found"));
+				FAStarNode newChildNode = FAStarNode(childNodePos);
+
+				newChildNode.SetG(CurrentNode.GetG() + 1);
+				newChildNode.SetH(FMath::Pow((newChildNode.GetPosition().X - TargetPos.X), 2) + FMath::Pow((newChildNode.GetPosition().Y - TargetPos.Y), 2));
+				newChildNode.SetF(newChildNode.GetG() + newChildNode.GetH());
+				UE_LOG(LogTemp, Warning, TEXT("Set ghf"));
+				
+				ChildrenNodes.Add(newChildNode);		
+			}
 		}
 	}
 }

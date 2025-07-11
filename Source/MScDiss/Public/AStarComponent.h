@@ -18,17 +18,17 @@ private :
 
 	FVector2D Position;
 
-	FAStarNode* Parent;
+	//FAStarNode &Parent;
 
 
 public :
 
 	FAStarNode(){};
 
-	FAStarNode(FVector2D position, FAStarNode* parent)
+	FAStarNode(FVector2D position)
 	{
 		Position = position;
-		Parent = parent;
+		//Parent = parent;
 	};
 
 	int GetG() { return G; };
@@ -45,7 +45,7 @@ public :
 
 	FVector2D GetPosition() { return Position; };
 
-	FAStarNode* GetParent() { return Parent; };
+	//FAStarNode* GetParent() { return Parent; };
 
 };
 
@@ -62,11 +62,12 @@ class MSCDISS_API UAStarComponent : public UActorComponent
 
 	
 
-	FAStarNode* CurrentNode;
+	FAStarNode CurrentNode;
+	FAStarNode* CurrentNodePointer;
 	
-	TArray<FAStarNode*> OpenLocations;
-	TArray<FAStarNode*> ClosedLocations;
-	TArray<FAStarNode*> ChildrenNodes;
+	std::list<FAStarNode> OpenLocations;
+	std::list<FVector2D> ClosedLocations;
+	TArray<FAStarNode> ChildrenNodes;
 
 	TArray<FVector2D> Path;
 	
