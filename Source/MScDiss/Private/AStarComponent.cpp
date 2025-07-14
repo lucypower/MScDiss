@@ -47,7 +47,13 @@ void UAStarComponent::GetGridArray()
 	AActor* MapGenActor = UGameplayStatics::GetActorOfClass(GetWorld(), AAStarMapGeneration::StaticClass());
 	MapGeneration = Cast<AAStarMapGeneration>(MapGenActor);
 	Grid = MapGeneration->GetGrid();
-		
+
+	NodeGrid.SetNum(MapGeneration->GetGridWidth());
+
+	for (TArray<FAStarNode>& currentRow: NodeGrid)
+	{
+		currentRow.SetNum(MapGeneration->GetGridHeight());
+	}
 }
 
 void UAStarComponent::AStar()
@@ -58,6 +64,8 @@ void UAStarComponent::AStar()
 
 	FAStarNode start = FAStarNode(StartPos, StartPos);
 	FAStarNode target = FAStarNode(TargetPos, TargetPos);
+
+	Nodes.Add(StartPos, start);
 	
 	OpenLocations.push_back(start);
 
@@ -66,7 +74,7 @@ void UAStarComponent::AStar()
 	while (OpenLocations.size() > 0)
 	{
 		CurrentNode = OpenLocations.front(); 
-		CurrentNodePointer = &CurrentNode;
+		
 		int index = -1;
 		int indexToDelete = 0;
 		
@@ -82,8 +90,6 @@ void UAStarComponent::AStar()
 
 		
 		OpenLocations.erase(OpenLocations.begin() + indexToDelete);
-		//OpenLocations.remove(index); //TODO: not removing?
-		//OpenLocations.pop_front(); //removed the front but current node was second element for some reason
 		ClosedLocations.push_back(CurrentNode.GetPosition());
 
 		UE_LOG(LogTemp, Warning, TEXT("Current Added to close"));
@@ -94,39 +100,29 @@ void UAStarComponent::AStar()
 
 			OpenLocations.clear();
 			
-			FAStarNode* current = &CurrentNode;
-			TArray<FVector2D> path;
+			FAStarNode current = CurrentNode;
+			TArray<FAStarNode> path;
 
-			/*while (current->GetPosition() != start.GetPosition())
+			while (current.GetPosition() != start.GetPosition())
 			{
-				path.Add(current->GetPosition());
-				current = current->GetParentPosition();
+				path.Add(current);
+				current = NodeGrid[current.GetPosition().X][current.GetPosition().Y];
+				UE_LOG(LogTemp, Warning, TEXT("Children Array Num : %d"), path.Num());
 			}
 
-			for (int i = path.Num() - 1; i >= 0; i--)
+			path.Add(start);
+
+			for (int i = path.Num(); i > 0; i--)
 			{
 				if (i != path.Num())
 				{
-					DrawDebugLine(GetWorld(), FVector(path[i].X * 100, path[i].Y * 100, 100 ), FVector(path[i-1].X * 100, path[i-1].Y * 100, 100), FColor::Red, true);
+					DrawDebugLine(GetWorld(), FVector(path[i].GetPosition().X * 100, path[i].GetPosition().Y * 100, 100 ),
+						FVector(path[i-1].GetPosition().X * 100, path[i-1].GetPosition().Y * 100, 100), FColor::Red, true);
 				}
-			}*/
-
-			/*while (current != nullptr)
-			{
-				path.Add(current->GetPosition());
-				current = current->GetParent();
 			}
 
-			for (int i = path.Num() - 1; i >= 0; i--)
-			{			
-				if (i != path.Num())
-				{
-					DrawDebugLine(GetWorld(), FVector(path[i].X * 100, path[i].Y * 100, 100 ), FVector(path[i-1].X * 100, path[i-1].Y * 100, 100), FColor::Red, true);
-				}
-				Path.Add(path[i]);*/
 		}
-		// SO : we find the path, following the psuedocode, then we reverse it, then we send a signal to the pawn to move through the reversed path somehow
-
+		
 		AddChild(FVector2D(CurrentNode.GetPosition().X - 1, CurrentNode.GetPosition().Y));
 		AddChild(FVector2D(CurrentNode.GetPosition().X + 1, CurrentNode.GetPosition().Y));		
 		AddChild(FVector2D(CurrentNode.GetPosition().X, CurrentNode.GetPosition().Y - 1));		
@@ -146,7 +142,8 @@ void UAStarComponent::AStar()
 				}
 			}
 
-			OpenLocations.push_back(child); 
+			OpenLocations.push_back(child);
+			NodeGrid[child.GetPosition().X][child.GetPosition().Y] = CurrentNode;
 		}
 
 		ChildrenNodes.Empty();
@@ -158,7 +155,7 @@ void UAStarComponent::AddChild(FVector2D childNodePos)
 	if (childNodePos.X >= 0 && childNodePos.Y >= 0 && childNodePos.X < MapGeneration->GetGridWidth() && childNodePos.Y < MapGeneration->GetGridHeight())
 	{
 		if (Grid[childNodePos.X][childNodePos.Y] == 0)
-		{
+		{			
 			if (!(std::find(ClosedLocations.begin(), ClosedLocations.end(), childNodePos) != ClosedLocations.end()))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Child floor found"));
@@ -169,7 +166,7 @@ void UAStarComponent::AddChild(FVector2D childNodePos)
 				newChildNode.SetF(newChildNode.GetG() + newChildNode.GetH());
 				UE_LOG(LogTemp, Warning, TEXT("Set ghf"));
 				
-				ChildrenNodes.Add(newChildNode);		
+				ChildrenNodes.Add(newChildNode);				
 			}
 		}
 	}

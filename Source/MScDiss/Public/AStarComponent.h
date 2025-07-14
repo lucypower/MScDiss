@@ -18,7 +18,7 @@ private :
 
 	FVector2D Position;
 
-	FVector2D ParentPosition;
+	//FAStarPathNode ParentNode;
 
 
 public :
@@ -28,7 +28,7 @@ public :
 	FAStarNode(FVector2D position, FVector2D parentPosition)
 	{
 		Position = position;
-		ParentPosition = parentPosition;
+		//ParentPosition = parentPosition;
 	};
 
 	int GetG() { return G; };
@@ -45,9 +45,8 @@ public :
 
 	FVector2D GetPosition() { return Position; };
 
-	FVector2D GetParentPosition() { return ParentPosition; };
+	//FVector2D GetParentPosition() { return ParentPosition; };
 };
-
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MSCDISS_API UAStarComponent : public UActorComponent
@@ -58,15 +57,17 @@ class MSCDISS_API UAStarComponent : public UActorComponent
 	AAStarMapGeneration* MapGeneration;
 
 	TArray<TArray<int>> Grid;
-
+	TArray<TArray<FAStarNode>> NodeGrid;
 	
-
 	FAStarNode CurrentNode;
-	FAStarNode* CurrentNodePointer;
+
+	UPROPERTY()
+	TMap<FVector2D, FAStarNode> Nodes;
 	
 	std::vector<FAStarNode> OpenLocations;
 	std::list<FVector2D> ClosedLocations;
 	TArray<FAStarNode> ChildrenNodes;
+	
 
 	TArray<FVector2D> Path;
 	
