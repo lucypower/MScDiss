@@ -3,6 +3,8 @@
 
 #include "AStarComponent.h"
 
+#include <corecrt_io.h>
+
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
@@ -92,7 +94,7 @@ void UAStarComponent::AStar()
 		OpenLocations.erase(OpenLocations.begin() + indexToDelete);
 		ClosedLocations.push_back(CurrentNode.GetPosition());
 
-		UE_LOG(LogTemp, Warning, TEXT("Current Added to close"));
+		UE_LOG(LogTemp, Warning, TEXT("Current Node Locations : %s"), *CurrentNode.GetPosition().ToString());
 
 		if (CurrentNode.GetPosition() == target.GetPosition())
 		{
@@ -107,7 +109,6 @@ void UAStarComponent::AStar()
 			{
 				path.Add(current);
 				current = NodeGrid[current.GetPosition().X][current.GetPosition().Y];
-				UE_LOG(LogTemp, Warning, TEXT("Children Array Num : %d"), path.Num());
 			}
 
 			path.Add(start);
@@ -121,6 +122,17 @@ void UAStarComponent::AStar()
 				}
 			}
 
+			for (int i = 0; i < MapGeneration->GetGridWidth(); i++)
+			{
+				for (int j = 0; j < MapGeneration->GetGridHeight(); j++)
+				{
+					if (NodeGrid[i][j].GetG() != 0)
+					{
+						DrawDebugBox(GetWorld(), FVector((i * 100) - 50, (j * 100) - 50, 50), FVector(100, 100, 1), FColor::Green, true);
+					}
+				}
+			}
+
 		}
 		
 		AddChild(FVector2D(CurrentNode.GetPosition().X - 1, CurrentNode.GetPosition().Y));
@@ -128,7 +140,6 @@ void UAStarComponent::AStar()
 		AddChild(FVector2D(CurrentNode.GetPosition().X, CurrentNode.GetPosition().Y - 1));		
 		AddChild(FVector2D(CurrentNode.GetPosition().X, CurrentNode.GetPosition().Y + 1));
 
-		UE_LOG(LogTemp, Warning, TEXT("Children Found"));
 		UE_LOG(LogTemp, Warning, TEXT("Children Array Num : %d"), ChildrenNodes.Num());
 
 
@@ -143,6 +154,7 @@ void UAStarComponent::AStar()
 			}
 
 			OpenLocations.push_back(child);
+			OpenLocationsPositions.push_back(child.GetPosition());
 			NodeGrid[child.GetPosition().X][child.GetPosition().Y] = CurrentNode;
 		}
 
@@ -158,15 +170,16 @@ void UAStarComponent::AddChild(FVector2D childNodePos)
 		{			
 			if (!(std::find(ClosedLocations.begin(), ClosedLocations.end(), childNodePos) != ClosedLocations.end()))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Child floor found"));
-				FAStarNode newChildNode = FAStarNode(childNodePos, CurrentNode.GetPosition());
+				if (!(std::find(OpenLocationsPositions.begin(), OpenLocationsPositions.end(), childNodePos) != OpenLocationsPositions.end()))
+				{
+					FAStarNode newChildNode = FAStarNode(childNodePos, CurrentNode.GetPosition());
 
-				newChildNode.SetG(CurrentNode.GetG() + 1);
-				newChildNode.SetH(FMath::Pow((newChildNode.GetPosition().X - TargetPos.X), 2) + FMath::Pow((newChildNode.GetPosition().Y - TargetPos.Y), 2));
-				newChildNode.SetF(newChildNode.GetG() + newChildNode.GetH());
-				UE_LOG(LogTemp, Warning, TEXT("Set ghf"));
+					newChildNode.SetG(CurrentNode.GetG() + 1);
+					newChildNode.SetH(FMath::Pow((newChildNode.GetPosition().X - TargetPos.X), 2) + FMath::Pow((newChildNode.GetPosition().Y - TargetPos.Y), 2));
+					newChildNode.SetF(newChildNode.GetG() + newChildNode.GetH());
 				
-				ChildrenNodes.Add(newChildNode);				
+					ChildrenNodes.Add(newChildNode);	
+				}							
 			}
 		}
 	}
