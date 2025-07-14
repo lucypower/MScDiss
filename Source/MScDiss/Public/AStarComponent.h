@@ -68,6 +68,7 @@ class MSCDISS_API UAStarComponent : public UActorComponent
 	std::list<FVector2D> ClosedLocations;
 	TArray<FAStarNode> ChildrenNodes;
 	
+	std::vector<FVector2D> OpenLocationsPositions;
 
 	TArray<FVector2D> Path;
 	
