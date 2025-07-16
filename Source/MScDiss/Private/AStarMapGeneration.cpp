@@ -123,6 +123,10 @@ void AAStarMapGeneration::InstantiateGrid()
 			{
 				GetWorld()->SpawnActor<AActor>(GridWalls, FVector(i * 100, j * 100, 50), FRotator(0, 0, 0), spawnParameters);
 			}
+			else
+			{
+				OpenSpaces.Add(FVector2D(i, j));
+			}
 		}
 	}
 }
