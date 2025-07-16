@@ -75,5 +75,6 @@ public:
 
 	int GetGridHeight() {return GridHeight;};
 
+	UFUNCTION(BlueprintPure)
 	FVector2D GetRandomOpenSpace() {return OpenSpaces[FMath::RandRange(0, OpenSpaces.Num())];}; // TODO: Something about this makes the searching weird, come back to?
 };
