@@ -24,6 +24,8 @@ public:
 	TArray<TArray<int>> Grid, TempGrid;
 
 	TArray<FVector2D> OpenSpaces;
+	
+	TArray<FVector2D> WallSpaces;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Generation")
 	int GridHeight;
@@ -77,4 +79,7 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	FVector2D GetRandomOpenSpace() {return OpenSpaces[FMath::RandRange(0, OpenSpaces.Num())];}; // TODO: Something about this makes the searching weird, come back to?
+
+	UFUNCTION(BlueprintPure)
+	TArray<FVector2D> GetWallSpaces() {return WallSpaces;};
 };
