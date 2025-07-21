@@ -78,7 +78,7 @@ public:
 	int GetGridHeight() {return GridHeight;};
 
 	UFUNCTION(BlueprintPure)
-	FVector2D GetRandomOpenSpace() {return OpenSpaces[FMath::RandRange(0, OpenSpaces.Num())];}; // TODO: Something about this makes the searching weird, come back to?
+	FVector2D GetRandomOpenSpace() {return OpenSpaces[FMath::RandRange(0, OpenSpaces.Num() - 1)];}; // TODO: Something about this makes the searching weird, come back to?
 
 	UFUNCTION(BlueprintPure)
 	TArray<FVector2D> GetWallSpaces() {return WallSpaces;};

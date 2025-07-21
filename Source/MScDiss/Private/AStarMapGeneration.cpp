@@ -122,7 +122,6 @@ void AAStarMapGeneration::InstantiateGrid()
 			if (Grid[i][j] == 1)
 			{
 				GetWorld()->SpawnActor<AActor>(GridWalls, FVector(i * 100, j * 100, 50), FRotator(0, 0, 0), spawnParameters);
-				WallSpaces.Add(FVector2D(i * 100, j * 100));
 			}
 			else
 			{
@@ -169,6 +168,7 @@ void AAStarMapGeneration::GetRegionsAndEdges()
 	{
 		regions.Empty();
 		edges.Empty();
+		WallSpaces.Empty();
 
 		if (CorridorIterations <= 3)
 		{
@@ -286,6 +286,7 @@ TArray<FVector2D> AAStarMapGeneration::GetRegionEdges(TArray<FVector2D> region)
 				if ((i == tile.X || j == tile.Y) && Grid[i][j] == 1)
 				{
 					edgeTiles.Add(tile);
+					WallSpaces.Add(FVector2D(tile.X * 100, tile.Y * 100));
 				}
 			}
 		}
