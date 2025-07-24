@@ -25,7 +25,7 @@ public :
 
 	FAStarNode(){};
 
-	FAStarNode(FVector2D position, FVector2D parentPosition)
+	FAStarNode(FVector2D position)
 	{
 		Position = position;
 		//ParentPosition = parentPosition;

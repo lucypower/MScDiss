@@ -64,8 +64,17 @@ void UAStarComponent::AStar()
 
 	// need to get spawn location from whatever class I do that in / ML one
 
-	FAStarNode start = FAStarNode(StartPos, StartPos);
-	FAStarNode target = FAStarNode(TargetPos, TargetPos);
+	FAStarNode start = FAStarNode(MapGeneration->GetRandomOpenSpace());
+	FAStarNode target = FAStarNode(TargetPos);
+
+	if (Grid[TargetPos.X][TargetPos.Y] == 1)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, "No Target Found");
+		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Start Node Locations : %s"), *start.GetPosition().ToString());
+	UE_LOG(LogTemp, Warning, TEXT("Target Node Locations : %s"), *target.GetPosition().ToString());
 
 	Nodes.Add(StartPos, start);
 	
@@ -94,8 +103,6 @@ void UAStarComponent::AStar()
 		OpenLocations.erase(OpenLocations.begin() + indexToDelete);
 		ClosedLocations.push_back(CurrentNode.GetPosition());
 
-		UE_LOG(LogTemp, Warning, TEXT("Current Node Locations : %s"), *CurrentNode.GetPosition().ToString());
-
 		if (CurrentNode.GetPosition() == target.GetPosition())
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, "Target Found");
@@ -122,6 +129,7 @@ void UAStarComponent::AStar()
 				}
 			}
 
+			
 			for (int i = 0; i < MapGeneration->GetGridWidth(); i++)
 			{
 				for (int j = 0; j < MapGeneration->GetGridHeight(); j++)
@@ -133,6 +141,7 @@ void UAStarComponent::AStar()
 				}
 			}
 
+			break;
 		}
 		
 		AddChild(FVector2D(CurrentNode.GetPosition().X - 1, CurrentNode.GetPosition().Y));
@@ -140,8 +149,10 @@ void UAStarComponent::AStar()
 		AddChild(FVector2D(CurrentNode.GetPosition().X, CurrentNode.GetPosition().Y - 1));		
 		AddChild(FVector2D(CurrentNode.GetPosition().X, CurrentNode.GetPosition().Y + 1));
 
-		UE_LOG(LogTemp, Warning, TEXT("Children Array Num : %d"), ChildrenNodes.Num());
-
+		AddChild(FVector2D(CurrentNode.GetPosition().X - 1, CurrentNode.GetPosition().Y - 1));
+		AddChild(FVector2D(CurrentNode.GetPosition().X + 1, CurrentNode.GetPosition().Y -1));		
+		AddChild(FVector2D(CurrentNode.GetPosition().X - 1, CurrentNode.GetPosition().Y + 1));		
+		AddChild(FVector2D(CurrentNode.GetPosition().X + 1, CurrentNode.GetPosition().Y + 1));
 
 		for (FAStarNode child : ChildrenNodes)
 		{
@@ -172,7 +183,7 @@ void UAStarComponent::AddChild(FVector2D childNodePos)
 			{
 				if (!(std::find(OpenLocationsPositions.begin(), OpenLocationsPositions.end(), childNodePos) != OpenLocationsPositions.end()))
 				{
-					FAStarNode newChildNode = FAStarNode(childNodePos, CurrentNode.GetPosition());
+					FAStarNode newChildNode = FAStarNode(childNodePos);
 
 					newChildNode.SetG(CurrentNode.GetG() + 1);
 					newChildNode.SetH(FMath::Pow((newChildNode.GetPosition().X - TargetPos.X), 2) + FMath::Pow((newChildNode.GetPosition().Y - TargetPos.Y), 2));
@@ -183,4 +194,5 @@ void UAStarComponent::AddChild(FVector2D childNodePos)
 			}
 		}
 	}
+
 }
