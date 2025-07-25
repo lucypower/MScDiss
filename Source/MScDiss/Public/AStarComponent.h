@@ -93,4 +93,6 @@ public:
 	void AStar();
 
 	void AddChild(FVector2D childNodePos);
+
+	TArray<FVector2D> GetPath() const {return Path;} ;
 };

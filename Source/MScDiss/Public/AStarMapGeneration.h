@@ -27,6 +27,8 @@ public:
 	
 	TArray<FVector2D> WallSpaces;
 
+	TArray<AActor*> Walls;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Generation")
 	int GridHeight;
 
@@ -82,4 +84,7 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	TArray<FVector2D> GetWallSpaces() {return WallSpaces;};
+
+	UFUNCTION(BlueprintCallable)
+	void ResetGrid();
 };

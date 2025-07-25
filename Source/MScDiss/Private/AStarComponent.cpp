@@ -26,7 +26,7 @@ void UAStarComponent::BeginPlay()
 
 	UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
 	
-	GetGridArray();
+	//GetGridArray();
 
 	UE_LOG(LogTemp, Warning, TEXT("Grid Array Got"));
 
@@ -60,11 +60,22 @@ void UAStarComponent::GetGridArray()
 
 void UAStarComponent::AStar()
 {
+	Nodes.Empty();
+	OpenLocations.clear();
+	ClosedLocations.clear();
+	Path.Empty();
+	NodeGrid.Empty();
+	OpenLocationsPositions.clear();
+	ChildrenNodes.Empty();
+
+	GetGridArray();
+	
 	UE_LOG(LogTemp, Warning, TEXT("A* Started"));
 
 	// need to get spawn location from whatever class I do that in / ML one
 
-	FAStarNode start = FAStarNode(MapGeneration->GetRandomOpenSpace());
+	//FAStarNode start = FAStarNode(MapGeneration->GetRandomOpenSpace());
+	FAStarNode start = FAStarNode(StartPos);
 	FAStarNode target = FAStarNode(TargetPos);
 
 	if (Grid[TargetPos.X][TargetPos.Y] == 1)
@@ -115,10 +126,12 @@ void UAStarComponent::AStar()
 			while (current.GetPosition() != start.GetPosition())
 			{
 				path.Add(current);
+				Path.Add(current.GetPosition());
 				current = NodeGrid[current.GetPosition().X][current.GetPosition().Y];
 			}
 
 			path.Add(start);
+			Path.Add(StartPos);
 
 			for (int i = path.Num(); i > 0; i--)
 			{

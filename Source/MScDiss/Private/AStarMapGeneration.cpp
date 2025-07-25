@@ -1,5 +1,6 @@
 
 #include "AStarMapGeneration.h"
+#include "Components/LineBatchComponent.h"
 
 AAStarMapGeneration::AAStarMapGeneration()
 {
@@ -11,14 +12,6 @@ void AAStarMapGeneration::BeginPlay()
 	Super::BeginPlay();
 
 	GenerateGrid();
-
-	IterateGrid();
-
-	AddBorder();
-
-	GetRegionsAndEdges();
-
-	InstantiateGrid();
 }
 
 void AAStarMapGeneration::Tick(float DeltaTime)
@@ -49,6 +42,14 @@ void AAStarMapGeneration::GenerateGrid()
 			Grid[i][j] = FMath::RandRange(0, 100) > GridDensity ? 0 : 1;
 		}
 	}
+
+	IterateGrid();
+
+	AddBorder();
+
+	GetRegionsAndEdges();
+
+	InstantiateGrid();
 }
 
 void AAStarMapGeneration::IterateGrid()
@@ -111,6 +112,29 @@ int AAStarMapGeneration::GetNeighbouringWallCount(int x, int y)
 	return neighbouringWalls;
 }
 
+void AAStarMapGeneration::ResetGrid()
+{
+	GetWorld()->PersistentLineBatcher->Flush();
+	
+	for (AActor* wall : Walls)
+	{
+		wall->Destroy();
+	}
+
+	Walls.Empty();
+	TempGrid.Empty();
+	Grid.Empty();
+	OpenSpaces.Empty();
+	WallSpaces.Empty();
+
+	GenerateGrid();
+
+	if (Grid[1][1] == 1 || Grid[GridWidth - 2][GridHeight - 2] == 1)
+	{
+		ResetGrid();
+	}
+}
+
 void AAStarMapGeneration::InstantiateGrid()
 {
 	FActorSpawnParameters spawnParameters;
@@ -121,7 +145,7 @@ void AAStarMapGeneration::InstantiateGrid()
 		{
 			if (Grid[i][j] == 1)
 			{
-				GetWorld()->SpawnActor<AActor>(GridWalls, FVector(i * 100, j * 100, 50), FRotator(0, 0, 0), spawnParameters);
+				Walls.Add(GetWorld()->SpawnActor<AActor>(GridWalls, FVector(i * 100, j * 100, 50), FRotator(0, 0, 0), spawnParameters));
 			}
 			else
 			{
@@ -169,11 +193,13 @@ void AAStarMapGeneration::GetRegionsAndEdges()
 		regions.Empty();
 		edges.Empty();
 		WallSpaces.Empty();
+		
+		GetRegionsAndEdges();
 
-		if (CorridorIterations <= 3)
+		/*if (CorridorIterations <= 5)
 		{
 			GetRegionsAndEdges();
-		}
+		}*/
 	}
 }
 
