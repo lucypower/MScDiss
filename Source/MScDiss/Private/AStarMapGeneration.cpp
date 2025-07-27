@@ -133,6 +133,11 @@ void AAStarMapGeneration::ResetGrid()
 	{
 		ResetGrid();
 	}
+	
+	/*if (Grid[GridWidth - 2][GridHeight - 2] == 1)
+	{
+		ResetGrid();
+	}*/
 }
 
 void AAStarMapGeneration::InstantiateGrid()
