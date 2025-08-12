@@ -21,12 +21,6 @@ void UFSMPlayerPawnComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	WeaponClass = FMath::RandRange(0, 1);
-	CurrentGold = FMath::RandRange(0, 1000);
-	Reputation = FMath::RandRange(0, 10);
-
-	APawn* Pawn = Cast<APawn>(GetOwner());
-	UFSMPlayerPawnComponent::OnPlayerPawnSpawned.Broadcast(Pawn);
 }
 
 
@@ -36,5 +30,15 @@ void UFSMPlayerPawnComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UFSMPlayerPawnComponent::RandomiseStats()
+{
+	WeaponClass = FMath::RandRange(0, 1);
+	CurrentGold = FMath::RandRange(0, 1000);
+	Reputation = FMath::RandRange(0, 10);
+
+	APawn* Pawn = Cast<APawn>(GetOwner());
+	UFSMPlayerPawnComponent::OnPlayerPawnSpawned.Broadcast(Pawn);
 }
 

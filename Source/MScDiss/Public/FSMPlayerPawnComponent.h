@@ -42,4 +42,7 @@ public:
 	int GetCurrentGold() {return CurrentGold;};
 
 	int GetReputation() {return Reputation;};
+
+	UFUNCTION(BlueprintCallable)
+	void RandomiseStats();
 };
