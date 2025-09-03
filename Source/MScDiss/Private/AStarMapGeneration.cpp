@@ -133,11 +133,6 @@ void AAStarMapGeneration::ResetGrid()
 	{
 		ResetGrid();
 	}
-	
-	/*if (Grid[GridWidth - 2][GridHeight - 2] == 1)
-	{
-		ResetGrid();
-	}*/
 }
 
 void AAStarMapGeneration::InstantiateGrid()
@@ -201,10 +196,6 @@ void AAStarMapGeneration::GetRegionsAndEdges()
 		
 		GetRegionsAndEdges();
 
-		/*if (CorridorIterations <= 5)
-		{
-			GetRegionsAndEdges();
-		}*/
 	}
 }
 

@@ -6,6 +6,9 @@
 #include "FSMPlayerPawnComponent.h"
 #include "Blueprint/UserWidget.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogFSMComponent, Log, All);
+
+
 // Sets default values for this component's properties
 UFSMComponent::UFSMComponent()
 {
@@ -13,6 +16,7 @@ UFSMComponent::UFSMComponent()
 
 	WeaponNames = {"Sword", "Bow"};
 	ItemNames = {"Potion", "Key", "Bomb"};
+	bDiscounts = {false, false, false};
 }
 
 void UFSMComponent::BeginPlay()
@@ -33,7 +37,7 @@ void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		case EFSMState::GreetPlayer:
 
 			DelayHandle.Invalidate();
-			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::SpeakToPlayer, 1, false);
+			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::SpeakToPlayer, 0.001, false);
 			
 		break;
 		
@@ -45,7 +49,7 @@ void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		case EFSMState::ResetShop:
 
 			DelayHandle.Invalidate();
-			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::ResetShop, 2, false);
+			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::ResetShop, 0.001, false);
 
 		break;
 
@@ -56,21 +60,21 @@ void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		case EFSMState::DecidingItemsAndPrices:
 
 			DelayHandle.Invalidate();
-			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::DecideShop, 2, false);
+			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::DecideShop, 0.001, false);
 
 			break;
 
 		case EFSMState::DecidingDiscounts:
 
 			DelayHandle.Invalidate();
-			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::DecideDiscount, 2, false);
+			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::DecideDiscount, 0.001, false);
 			
 			break;
 		
 		case EFSMState::Displaying:
 
 			DelayHandle.Invalidate();
-			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::DisplayShop, 2, false);
+			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UFSMComponent::DisplayShop, 0.001, false);
 
 			break;
 	}
@@ -95,6 +99,8 @@ void UFSMComponent::SpeakToPlayer()
 
 void UFSMComponent::ResetShop()
 {
+	Runs += 0.5;
+	
 	if (!ShopItemNames.IsEmpty())
 	{
 		ShopItemNames.Empty();
@@ -108,7 +114,9 @@ void UFSMComponent::ResetShop()
 }
 
 void UFSMComponent::GetPlayerStats(APawn* Pawn)
-{
+{	
+	StartTime = FPlatformTime::Seconds();
+	
 	CurrentState = EFSMState::Evaluating;
 	
 	UFSMPlayerPawnComponent* Player = Pawn->GetComponentByClass<UFSMPlayerPawnComponent>();
@@ -166,12 +174,16 @@ void UFSMComponent::DecideDiscount()
 	{
 		for (int i = 0; i < 3; i++)
 		{
+			bDiscounts[i] = false;
+			
 			if (FMath::RandRange(0, 5) == 1)
 			{
 				int DiscountMultiplier = 5 - PlayerReputation;
 				float Discount = 1 + (DiscountMultiplier * 0.2);
 
 				ShopItemPrices[i] = ShopItemPrices[i] * Discount;
+
+				bDiscounts[i] = true;
 
 				if (Discount > 1)
 				{
@@ -192,6 +204,9 @@ void UFSMComponent::DecideDiscount()
 
 void UFSMComponent::DisplayShop()
 {
+	EndTime = FPlatformTime::Seconds();
+	UE_LOG(LogFSMComponent, Log, TEXT("Shop Decision Took : %f"), EndTime - StartTime);
+	
 	CurrentState = EFSMState::Idle;
 }
 

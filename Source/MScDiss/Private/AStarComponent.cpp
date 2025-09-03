@@ -7,14 +7,13 @@
 
 #include "Kismet/GameplayStatics.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogAStarComponent, Log, All);
+
 // Sets default values for this component's properties
 UAStarComponent::UAStarComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
 }
 
 
@@ -23,14 +22,9 @@ void UAStarComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
+	StartTime = FPlatformTime::Seconds();
 	
-	//GetGridArray();
-
-	UE_LOG(LogTemp, Warning, TEXT("Grid Array Got"));
-
-	UE_LOG(LogTemp, Warning, TEXT("A* Starting"));
+	GetOwner()->SetActorLocation(FVector(100, 100, 0));
 
 	AStar();
 }
@@ -41,7 +35,27 @@ void UAStarComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	if (GetOwner()->ActorHasTag("A*DefaultPawn") && PathIndex >= 0 && MovePawn)
+	{
+		FVector CurrentLocation = GetOwner()->GetActorLocation();
+		FVector NextLocation = FVector(Path[PathIndex].X * 100, Path[PathIndex].Y * 100, 0);
+
+		FVector Direction = (NextLocation - CurrentLocation).GetSafeNormal();
+		FVector NewLocation = CurrentLocation + Direction * DeltaTime * 600;
+
+		GetOwner()->SetActorLocation(NewLocation);
+
+		if (FVector::Dist(CurrentLocation, NextLocation) <= 25)
+		{
+			PathIndex--;
+
+			if (PathIndex < 0)
+			{
+				EndTime = FPlatformTime::Seconds();
+				UE_LOG(LogAStarComponent, Log, TEXT("Arrived at target : %f ms"), EndTime - StartTime);
+			}
+		}
+	}
 }
 
 void UAStarComponent::GetGridArray()
@@ -72,9 +86,6 @@ void UAStarComponent::AStar()
 	
 	UE_LOG(LogTemp, Warning, TEXT("A* Started"));
 
-	// need to get spawn location from whatever class I do that in / ML one
-
-	//FAStarNode start = FAStarNode(MapGeneration->GetRandomOpenSpace());
 	FAStarNode start = FAStarNode(StartPos);
 	FAStarNode target = FAStarNode(TargetPos);
 
@@ -142,17 +153,26 @@ void UAStarComponent::AStar()
 				}
 			}
 
-			
+			int NodeVisitedCount = 0;
 			for (int i = 0; i < MapGeneration->GetGridWidth(); i++)
 			{
 				for (int j = 0; j < MapGeneration->GetGridHeight(); j++)
-				{
+				{					
 					if (NodeGrid[i][j].GetG() != 0)
 					{
+						NodeVisitedCount++;
 						DrawDebugBox(GetWorld(), FVector((i * 100) - 50, (j * 100) - 50, 50), FVector(100, 100, 1), FColor::Green, true);
 					}
 				}
 			}
+
+			UE_LOG(LogAStarComponent, Log, TEXT("Pawn : %s, Nodes Visited : %d"), *GetOwner()->GetName() ,NodeVisitedCount);
+			
+			EndTime = FPlatformTime::Seconds();
+			UE_LOG(LogAStarComponent, Log, TEXT("Path Generation took : %f ms"), EndTime - StartTime);			
+			
+			PathIndex = Path.Num() - 1; 
+			MovePawn = true;
 
 			break;
 		}

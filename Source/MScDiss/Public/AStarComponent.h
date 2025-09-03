@@ -71,6 +71,13 @@ class MSCDISS_API UAStarComponent : public UActorComponent
 	std::vector<FVector2D> OpenLocationsPositions;
 
 	TArray<FVector2D> Path;
+
+	int PathIndex = 0;
+	bool MovePawn = false;
+
+	// Time Logging
+	double StartTime;
+	double EndTime;
 	
 protected:
 	// Called when the game starts

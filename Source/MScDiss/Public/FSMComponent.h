@@ -45,6 +45,15 @@ public:
 
 	FTimerHandle DelayHandle;
 	bool bAppliedDiscounts;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<bool> bDiscounts;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float Runs;
+
+	double StartTime;
+	double EndTime;
 	
 protected:
 	// Called when the game starts
