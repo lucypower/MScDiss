@@ -9,8 +9,6 @@
 UAStarCollabComponent::UAStarCollabComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
-	
 }
 
 
@@ -18,9 +16,6 @@ UAStarCollabComponent::UAStarCollabComponent()
 void UAStarCollabComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
 }
 
 
@@ -28,8 +23,6 @@ void UAStarCollabComponent::BeginPlay()
 void UAStarCollabComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 void UAStarCollabComponent::SetupSpline()
